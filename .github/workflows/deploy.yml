@@ -18,4 +18,7 @@ jobs:
           python -m install --upgrade pip
           pip install -r requirements.txt
           
+       - name: Build Docker Image
+         run: docker build -t my-flask-app .
+       - name: Configure AWS Credentioals
           
