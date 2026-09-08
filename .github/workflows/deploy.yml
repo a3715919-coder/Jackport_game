@@ -18,7 +18,27 @@ jobs:
           python -m install --upgrade pip
           pip install -r requirements.txt
           
-       - name: Build Docker Image
-         run: docker build -t my-flask-app .
-       - name: Configure AWS Credentioals
-          
+      - name: Build Docker Image
+        run: docker build -t my-flask-app .
+      - name: Configure AWS Credentioals
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-south-1
+      - name: Login to Amazon Ecr 
+        id: login-ecr
+        uses: aws-action/amazon-ecr-login@v2
+      - name: Build, Tag and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: my-flask-app
+          IMAGE_TAG: latest
+
+        run: |
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              
+       
+       
